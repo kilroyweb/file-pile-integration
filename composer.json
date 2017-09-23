@@ -1,0 +1,27 @@
+{
+    "name": "kilroyweb/file-pile-integration",
+    "description": "Commands for FilePile.io",
+    "type": "library",
+    "require": {
+        "symfony/console": "^3.3"
+    },
+    "license": "MIT",
+    "authors": [
+        {
+            "name": "Jeff Kilroy",
+            "email": "jeffkilroy@gmail.com"
+        }
+    ],
+    "autoload": {
+        "psr-4": {
+            "KilroyWeb\\FilePile\\": "src/"
+        }
+    },
+    "extra": {
+        "laravel": {
+            "providers": [
+                "KilroyWeb\\FilePile\\Providers\\FilePileServiceProvider"
+            ]
+        }
+    }
+}
