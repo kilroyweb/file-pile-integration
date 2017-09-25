@@ -37,10 +37,6 @@ class FilePile extends Command
      */
     public function handle()
     {
-        $baseURI = config('filepile.baseURI');
-        $apiKey = config('filepile.apiKey');
-        $this->info($baseURI);
-        $this->info($apiKey);
-        $this->info('run list command');
+        $this->call('filepile:list', []);
     }
 }
