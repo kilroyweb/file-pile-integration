@@ -4,7 +4,7 @@ namespace KilroyWeb\FilePile\Commands;
 
 use Illuminate\Console\Command;
 
-class FilePile extends Command
+class FilePileInstallPile extends Command
 {
     /**
      * The name and signature of the console command.

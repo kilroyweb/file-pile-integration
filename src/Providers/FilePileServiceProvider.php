@@ -1,6 +1,6 @@
 <?php
 
-namespace KilroyWeb\FilePile;
+namespace KilroyWeb\FilePile\Providers;
 
 use Illuminate\Support\ServiceProvider;
 
