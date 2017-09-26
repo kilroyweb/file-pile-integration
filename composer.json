@@ -3,7 +3,8 @@
     "description": "Commands for FilePile.io",
     "type": "library",
     "require": {
-        "symfony/console": "^3.3"
+        "symfony/console": "^3.3",
+        "guzzlehttp/guzzle": "^6.3"
     },
     "license": "MIT",
     "authors": [

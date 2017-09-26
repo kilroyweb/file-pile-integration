@@ -37,10 +37,16 @@ class FilePileList extends Command
      */
     public function handle()
     {
-        $baseURI = config('filepile.baseURI');
-        $apiKey = config('filepile.apiKey');
-        $this->info($baseURI);
-        $this->info($apiKey);
-        $this->info('Call FilePile api for this key and list related piles');
+        $apiClient = new \KilroyWeb\FilePile\API\Client();
+        $response = $apiClient->call('GET','/api/v1/account/pile');
+        $piles = json_decode($response);
+        if(count($piles) > 0){
+            $this->info('The following commands are available:');
+            foreach($piles as $pile){
+                $this->info('* filepile:install '.$pile->slug);
+            }
+        }else{
+            $this->error('No commands available');
+        }
     }
 }
