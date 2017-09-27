@@ -8,11 +8,17 @@ class Client{
         $client = new \GuzzleHttp\Client([
             'base_uri' => config('filepile.baseURI'),
         ]);
-        $request = $client->request($method, $uri, [
+        $requestOptions = [
             'headers' => [
                 'Authorization' => 'Bearer '.config('filepile.apiKey'),
             ],
-        ]);
+        ];
+        if($method == 'GET'){
+            $requestOptions['query'] = $data;
+        }else{
+            $requestOptions['form_params'] = $data;
+        }
+        $request = $client->request($method, $uri, $requestOptions);
         $response = $request->getBody();
         return $response->getContents();
     }

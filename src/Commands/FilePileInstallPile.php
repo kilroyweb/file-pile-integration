@@ -37,12 +37,21 @@ class FilePileInstallPile extends Command
      */
     public function handle()
     {
-        $baseURI = config('filepile.baseURI');
-        $apiKey = config('filepile.apiKey');
-        $this->info($baseURI);
-        $this->info($apiKey);
-        $this->info('Call FilePile api for this key and get prompts');
-        $this->info('Show Prompts');
-        $this->info('Pass back to FilePile api and copy files');
+        $pileSlug = $this->argument('pileSlug');
+        $apiClient = new \KilroyWeb\FilePile\API\Client();
+        $pileResponse = $apiClient->call('GET','/api/v1/account/pile/find',['slug'=>$pileSlug]);
+        $pile = json_decode($pileResponse);
+        if(!$pile){
+            $this->error('Pile not found!');
+        }else{
+            $promptsResponse = $apiClient->call('GET','/api/v1/account/pile/'.$pile->uuid.'/prompt');
+            $promptInputs = [];
+            $prompts = json_decode($promptsResponse);
+            foreach($prompts as $prompt){
+                $promptInputs[$prompt->uuid] = $this->ask($prompt->label);
+            }
+            dump($promptInputs);
+            $this->info('Pass back to FilePile api and copy files');
+        }
     }
 }
