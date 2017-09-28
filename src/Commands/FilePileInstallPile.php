@@ -55,6 +55,7 @@ class FilePileInstallPile extends Command
                 $this->installFiles($pileBaseInstallPath,$files);
             }
         }
+        $this->showPostInstallationMessage($pile);
     }
 
     private function getPileFromSlug($pileSlug){
@@ -118,10 +119,16 @@ class FilePileInstallPile extends Command
 
     private function installFile($pileBaseInstallPath, $file){
         $fullFilePath = $this->fullFilePath($pileBaseInstallPath,$file);
-        $this->info('Creating: '.$fullFilePath);
+        $this->info('+ Creating: '.$fullFilePath);
         $fileContent = base64_decode($file->content);
         $fileWriter = new FileWriter();
         $fileWriter->create(base_path($fullFilePath),$fileContent);
+    }
+
+    private function showPostInstallationMessage($pile){
+        if(!empty($pile->post_install_message)){
+            $this->info("\n".$pile->post_install_message);
+        }
     }
 
 }
