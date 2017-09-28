@@ -65,6 +65,9 @@ class FilePileInstallPile extends Command
     }
 
     private function getPileBaseInstallPath($defaultPath='/'){
+        if(empty($defaultPath)){
+            $defaultPath = '/';
+        }
         return $this->ask('Pile Install Path (From Project Root)?',$defaultPath);
     }
 
