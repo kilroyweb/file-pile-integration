@@ -2,6 +2,7 @@
 
 namespace KilroyWeb\FilePile\Commands;
 
+use KilroyWeb\FilePile\Support\Version\ApplicationVersionChecker;
 use Illuminate\Console\Command;
 
 class FilePile extends Command
@@ -37,6 +38,15 @@ class FilePile extends Command
      */
     public function handle()
     {
+        $this->info('
+  ___ _ _     ___ _ _     
+ | __(_) |___| _ (_) |___ 
+ | _|| | / -_)  _/ | / -_)
+ |_| |_|_\___|_| |_|_\___|
+                          
+        ');
+        $version = ApplicationVersionChecker::get();
+        $this->info('Version: '.$version);
         $this->call('filepile:list', []);
     }
 }
