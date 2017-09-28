@@ -87,6 +87,9 @@ class FilePileInstallPile extends Command
     }
 
     private function getWriteFilesConfirmation($pileBaseInstallPath, $files){
+        if(!config('filepile.confirmInstallation')){
+            return true;
+        }
         $this->info('FilePile is about to write the following files:');
         foreach($files as $file){
             $this->info('*'.$this->fullFilePath($pileBaseInstallPath,$file));
