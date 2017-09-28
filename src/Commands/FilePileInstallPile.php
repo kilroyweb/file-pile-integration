@@ -38,6 +38,10 @@ class FilePileInstallPile extends Command
      */
     public function handle()
     {
+        if(config('app.env') == 'production' && !config('filepile.enableInProduction')){
+            $this->error('Error: Application is in production. You could set FILEPILE_ENABLE_PRODUCTION=true, but that would be madness');
+            return null;
+        }
         $pileSlug = $this->argument('pileSlug');
         $pile = $this->getPileFromSlug($pileSlug);
         if(!$pile){
