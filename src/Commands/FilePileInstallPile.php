@@ -39,32 +39,82 @@ class FilePileInstallPile extends Command
     public function handle()
     {
         $pileSlug = $this->argument('pileSlug');
-        $apiClient = new \KilroyWeb\FilePile\API\Client();
-        $pileResponse = $apiClient->call('GET','/api/v1/account/pile/find',['slug'=>$pileSlug]);
-        $pile = json_decode($pileResponse);
+        $pile = $this->getPileFromSlug($pileSlug);
         if(!$pile){
             $this->error('Pile not found!');
         }else{
-            $defaultRootDirectory = base_path();
-            $rootDirectory = $this->ask('Root Directory?',$defaultRootDirectory);
-            $promptsResponse = $apiClient->call('GET','/api/v1/account/pile/'.$pile->uuid.'/prompt');
-            $promptInputs = [];
-            $prompts = json_decode($promptsResponse);
-            foreach($prompts as $prompt){
-                $promptInputs[$prompt->uuid] = $this->ask($prompt->label);
-            }
-            $filesResponse = $apiClient->call('GET','/api/v1/account/pile/'.$pile->uuid.'/file',[
-                'prompts' => $promptInputs,
-            ]);
-            $fileDetails = json_decode($filesResponse);
-            foreach($fileDetails as $fileDetail){
-                $this->info('Creating: '.$fileDetail->path);
-                $filePath = $defaultRootDirectory.'/'.$fileDetail->path;
-                $fileContent = base64_decode($fileDetail->content);
-                $fileWriter = new FileWriter();
-                $fileWriter->create($filePath,$fileContent);
+            $pileBaseInstallPath = $this->getPileBaseInstallPath($pile->install_path);
+            $promptInputs = $this->getPromptInputs($pile);
+            $files = $this->getFiles($pile, $promptInputs);
+            $writeFilesConfirmation = $this->getWriteFilesConfirmation($pileBaseInstallPath, $files);
+            if($writeFilesConfirmation){
+                $this->installFiles($pileBaseInstallPath,$files);
             }
         }
+    }
+
+    private function getPileFromSlug($pileSlug){
+        $apiClient = new \KilroyWeb\FilePile\API\Client();
+        $pileResponse = $apiClient->call('GET','/api/v1/account/pile/find',['slug'=>$pileSlug]);
+        return json_decode($pileResponse);
+    }
+
+    private function getPileBaseInstallPath($defaultPath='/'){
+        return $this->ask('Pile Install Path (From Project Root)?',$defaultPath);
+    }
+
+    private function getPromptInputs($pile){
+        $apiClient = new \KilroyWeb\FilePile\API\Client();
+        $promptsResponse = $apiClient->call('GET','/api/v1/account/pile/'.$pile->uuid.'/prompt');
+        $promptInputs = [];
+        $prompts = json_decode($promptsResponse);
+        foreach($prompts as $prompt){
+            $promptInputs[$prompt->uuid] = $this->ask($prompt->label);
+        }
+        return $promptInputs;
+    }
+
+    private function getFiles($pile, $promptInputs){
+        $apiClient = new \KilroyWeb\FilePile\API\Client();
+        $filesResponse = $apiClient->call('GET','/api/v1/account/pile/'.$pile->uuid.'/file',[
+            'prompts' => $promptInputs,
+        ]);
+        return json_decode($filesResponse);
+    }
+
+    private function getWriteFilesConfirmation($pileBaseInstallPath, $files){
+        $this->info('FilePile is about to write the following files:');
+        foreach($files as $file){
+            $this->info('*'.$this->fullFilePath($pileBaseInstallPath,$file));
+        }
+        $confirmationInput = $this->ask(
+            'Continue?',
+            'Y'
+        );
+        if(strtoupper($confirmationInput) == 'Y'){
+            return true;
+        }
+        return false;
+    }
+
+    private function fullFilePath($pileBaseInstallPath,$file){
+        $pileBaseInstallPath = trim($pileBaseInstallPath,'/');
+        $filePath = trim($file->path,'/');
+        return $pileBaseInstallPath.'/'.$filePath;
+    }
+
+    private function installFiles($pileBaseInstallPath, $files){
+        foreach($files as $file){
+            $this->installFile($pileBaseInstallPath, $file);
+        }
+    }
+
+    private function installFile($pileBaseInstallPath, $file){
+        $fullFilePath = $this->fullFilePath($pileBaseInstallPath,$file);
+        $this->info('Creating: '.$fullFilePath);
+        $fileContent = base64_decode($file->content);
+        $fileWriter = new FileWriter();
+        $fileWriter->create(base_path($fullFilePath),$fileContent);
     }
 
 }
